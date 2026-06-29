@@ -18,10 +18,19 @@ fn main() {
 
     let source_code2 = module.source_code_arc();
     let mut lexer = Lexer::new(&source_code2);
-    lexer.run();
+    let tokens = lexer.run();
 
-    lexer.transfer_tokens_and_diagnostics(&mut module);
-    module.display_tokens();
+    for token in tokens.iter() {
+        println!(
+            "{} => {:?} at [{}:{}]",
+            token.lexeme(),
+            token.kind(),
+            token.span().start,
+            token.span().end
+        )
+    }
+
+    lexer.transfer_diagnostics(&mut module);
 }
 
 #[derive(Parser)]

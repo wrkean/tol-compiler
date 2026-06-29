@@ -40,20 +40,20 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> Vec<Token<'src>> {
         while self.peek().is_some() {
             self.start = self.current;
             self.lex_token();
         }
 
         self.add_token(TokenKind::Eof, Some("<EOF>"));
+
+        mem::take(&mut self.tokens)
     }
 
-    pub fn transfer_tokens_and_diagnostics(&mut self, module: &mut Module<'src>) {
-        let tokens = mem::take(&mut self.tokens);
+    pub fn transfer_diagnostics(&mut self, module: &mut Module) {
         let diagnostics = mem::take(&mut self.diagnostics);
 
-        module.set_tokens(tokens);
         module.set_diagnostics(diagnostics);
     }
 
