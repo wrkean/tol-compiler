@@ -1,9 +1,8 @@
 #![allow(unused)]
 
-use clap::Parser;
 use std::{fs, path::PathBuf};
 
-use crate::{lexer::Lexer, module::Module};
+use crate::{lexer::Lexer, module::Module, parser::Parser};
 
 mod ast;
 mod diagnostic;
@@ -14,8 +13,13 @@ mod prelude;
 mod token;
 
 fn main() {
-    let args = Args::parse();
-    let source_code = fs::read_to_string(args.input).unwrap();
+    let source_code = {
+        use clap::Parser;
+
+        let args = Args::parse();
+        fs::read_to_string(args.input).unwrap()
+    };
+
     let mut module = Module::new(source_code);
 
     let source_code2 = module.source_code_arc();
@@ -33,9 +37,13 @@ fn main() {
     }
 
     lexer.transfer_diagnostics(&mut module);
+
+    let mut parser = Parser::new(tokens, &mut module);
+    parser.run();
+    module.report_diagnostics();
 }
 
-#[derive(Parser)]
+#[derive(clap::Parser)]
 struct Args {
     /// Path to the input file
     #[arg(help("Path na nagtuturo sa input file"))]

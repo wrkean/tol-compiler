@@ -224,8 +224,7 @@ mod tests {
 
     fn lex(source: &str) -> Vec<Token> {
         let mut lexer = Lexer::new(source);
-        lexer.run();
-        lexer.tokens
+        lexer.run()
     }
 
     fn kinds(tokens: &[Token]) -> Vec<TokenKind> {

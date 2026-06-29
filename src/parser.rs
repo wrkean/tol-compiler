@@ -122,3 +122,100 @@ impl<'m> Parser<'m> {
         self.tokens[self.current].kind() == &TokenKind::Eof
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tok(lexeme: &str, kind: TokenKind, span: std::ops::Range<usize>) -> Token {
+        Token::new(lexeme.to_string(), kind, span)
+    }
+
+    fn eof(at: usize) -> Token {
+        Token::new("<EOF>".to_string(), TokenKind::Eof, at..at)
+    }
+
+    fn parser_for(tokens: Vec<Token>) -> Parser<'static> {
+        let source = Box::leak(String::from("").into_boxed_str());
+        let modul = Box::leak(Box::new(Module::new(source)));
+        Parser::new(tokens, modul)
+    }
+
+    #[test]
+    fn parses_precedence_left_associatively() {
+        let tokens = vec![
+            tok("1", TokenKind::IntLiteral, 0..1),
+            tok("+", TokenKind::Plus, 2..3),
+            tok("2", TokenKind::IntLiteral, 4..5),
+            tok("*", TokenKind::Star, 6..7),
+            tok("3", TokenKind::IntLiteral, 8..9),
+            eof(9),
+        ];
+
+        let mut parser = parser_for(tokens);
+        let expr = parser.parse_expression(0).unwrap();
+
+        assert_eq!(expr.pretty(), "(1 + (2 * 3))");
+        assert_eq!(expr.span(), &(0..9));
+    }
+
+    #[test]
+    fn parses_parenthesized_expression() {
+        let tokens = vec![
+            tok("(", TokenKind::LParen, 0..1),
+            tok("1", TokenKind::IntLiteral, 1..2),
+            tok("+", TokenKind::Plus, 3..4),
+            tok("2", TokenKind::IntLiteral, 5..6),
+            tok(")", TokenKind::RParen, 6..7),
+            eof(7),
+        ];
+
+        let mut parser = parser_for(tokens);
+        let expr = parser.parse_expression(0).unwrap();
+
+        assert_eq!(expr.pretty(), "(1 + 2)");
+        assert_eq!(expr.span(), &(1..6));
+    }
+
+    #[test]
+    fn reports_invalid_expression_start() {
+        let tokens = vec![tok("+", TokenKind::Plus, 0..1), eof(1)];
+        let mut parser = parser_for(tokens);
+
+        let err = parser.parse_expression(0).unwrap_err();
+
+        match err {
+            TolDiagnostic::Error(TolError::InvalidStartOfAnExpression { span }) => {
+                assert_eq!(span, (0..1).into());
+            }
+            other => panic!("unexpected diagnostic: {:?}", other),
+        }
+    }
+
+    #[test]
+    fn consumes_expected_closing_paren() {
+        let tokens = vec![
+            tok("(", TokenKind::LParen, 0..1),
+            tok("1", TokenKind::IntLiteral, 1..2),
+            tok("+", TokenKind::Plus, 2..3),
+            tok("2", TokenKind::IntLiteral, 3..4),
+            eof(4),
+        ];
+
+        let mut parser = parser_for(tokens);
+        let err = parser.parse_expression(0).unwrap_err();
+
+        match err {
+            TolDiagnostic::Error(TolError::UnexpectedToken {
+                token,
+                expected,
+                span,
+            }) => {
+                assert_eq!(token, "<EOF>");
+                assert_eq!(expected, ")");
+                assert_eq!(span, (4..4).into());
+            }
+            other => panic!("unexpected diagnostic: {:?}", other),
+        }
+    }
+}

@@ -1,4 +1,4 @@
-use miette::Diagnostic;
+use miette::{Diagnostic, IntoDiagnostic};
 use thiserror::Error;
 
 use crate::diagnostic::error::TolError;
@@ -8,6 +8,7 @@ pub mod error;
 #[derive(Diagnostic, Error, Debug)]
 pub enum TolDiagnostic {
     #[error(transparent)]
+    #[diagnostic(transparent)]
     Error(TolError),
 }
 

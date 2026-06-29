@@ -1,6 +1,6 @@
 use crate::prelude::Span;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Token {
     lexeme: String,
     kind: TokenKind,
