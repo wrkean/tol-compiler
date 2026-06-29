@@ -14,9 +14,17 @@ impl<'src> Token<'src> {
     pub fn kind(&self) -> &TokenKind {
         &self.kind
     }
+
+    pub fn lexeme(&self) -> &'src str {
+        self.lexeme
+    }
+
+    pub fn span(&self) -> &Span {
+        &self.span
+    }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum TokenKind {
     Par,
     Kung,

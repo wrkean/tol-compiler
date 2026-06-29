@@ -1,6 +1,8 @@
 use std::{collections::HashMap, iter::Peekable, mem, str::Chars};
 
 use crate::{
+    diagnostic::TolDiagnostic,
+    module::Module,
     prelude::Span,
     token::{Token, TokenKind},
 };
@@ -13,6 +15,7 @@ pub struct Lexer<'src> {
     bracket_depth: u8,
     tokens: Vec<Token<'src>>,
     keywords: HashMap<&'static str, TokenKind>,
+    diagnostics: Vec<TolDiagnostic>,
 }
 
 impl<'src> Lexer<'src> {
@@ -33,16 +36,25 @@ impl<'src> Lexer<'src> {
             tokens: Vec::new(),
             bracket_depth: 0,
             keywords,
+            diagnostics: Vec::new(),
         }
     }
 
-    pub fn run(&mut self) -> Vec<Token<'src>> {
+    pub fn run(&mut self) {
         while self.peek().is_some() {
             self.start = self.current;
             self.lex_token();
         }
 
-        mem::take(&mut self.tokens)
+        self.add_token(TokenKind::Eof, Some("<EOF>"));
+    }
+
+    pub fn transfer_tokens_and_diagnostics(&mut self, module: &mut Module<'src>) {
+        let tokens = mem::take(&mut self.tokens);
+        let diagnostics = mem::take(&mut self.diagnostics);
+
+        module.set_tokens(tokens);
+        module.set_diagnostics(diagnostics);
     }
 
     fn lex_token(&mut self) {
