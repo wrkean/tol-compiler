@@ -3,6 +3,7 @@
 use clap::Parser;
 use std::path::PathBuf;
 
+mod diagnostic;
 mod lexer;
 mod prelude;
 mod token;

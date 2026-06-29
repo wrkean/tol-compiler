@@ -116,9 +116,7 @@ impl<'src> Lexer<'src> {
             ' ' | '\t' | '\r' => { /* skip irrelevant whitespace */ }
             ch if ch.is_ascii_alphabetic() || ch == '_' => self.lex_identifier(),
             ch if ch.is_ascii_digit() => self.lex_number(),
-            _ => {
-                todo!()
-            }
+            _ => {}
         }
     }
 
