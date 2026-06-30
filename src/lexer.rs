@@ -342,6 +342,16 @@ mod tests {
     }
 
     #[test]
+    fn does_not_emit_an_inferred_semicolon_when_a_comment_runs_into_eof() {
+        let tokens = lex("foo -- comment");
+
+        assert_eq!(
+            kinds(&tokens),
+            vec![TokenKind::Identifier, TokenKind::Eof]
+        );
+    }
+
+    #[test]
     fn lexes_comparison_and_equality_operators() {
         let tokens = lex("< <= > >= = == + - * /");
 

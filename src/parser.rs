@@ -2,7 +2,7 @@ use crate::{
     ast::{
         Param,
         expr::{Expr, ExprKind},
-        stmt::Stmt,
+        stmt::{Stmt, StmtKind},
     },
     diagnostic::{TolDiagnostic, error::TolError},
     module::Module,
@@ -365,4 +365,70 @@ mod tests {
             other => panic!("unexpected diagnostic: {:?}", other),
         }
     }
+
+    #[test]
+    fn parses_name_declaration_with_type_and_expression() {
+        let tokens = vec![
+            tok("ang", TokenKind::Ang, 0..3),
+            tok("bilang", TokenKind::Identifier, 4..10),
+            tok(":", TokenKind::Colon, 10..11),
+            tok("numero", TokenKind::Identifier, 12..18),
+            tok("=", TokenKind::Equal, 19..20),
+            tok("42", TokenKind::IntLiteral, 21..23),
+            tok(";", TokenKind::Semicolon, 23..24),
+            eof(24),
+        ];
+
+        let mut parser = parser_for(tokens);
+        let statement = parser.parse_statement().unwrap();
+
+        match statement.kind() {
+            StmtKind::NameDeclaration {
+                is_mutable,
+                name,
+                ty,
+                rhs,
+            } => {
+                assert!(is_mutable);
+                assert_eq!(name.lexeme(), "bilang");
+                assert!(matches!(ty, Some(TolType::Numero)));
+                assert_eq!(rhs.to_string(), "42");
+            }
+            other => panic!("unexpected statement: {:?}", other),
+        }
+    }
+
+    #[test]
+    fn parses_function_declaration_with_empty_block() {
+        let tokens = vec![
+            tok("par", TokenKind::Par, 0..3),
+            tok("magdagdag", TokenKind::Identifier, 4..13),
+            tok("(", TokenKind::LParen, 13..14),
+            tok(")", TokenKind::RParen, 14..15),
+            tok("numero", TokenKind::Identifier, 16..22),
+            tok("{", TokenKind::LBrace, 23..24),
+            tok("}", TokenKind::RBrace, 24..25),
+            eof(25),
+        ];
+
+        let mut parser = parser_for(tokens);
+        let statement = parser.parse_statement().unwrap();
+
+        match statement.kind() {
+            StmtKind::FunctionDeclaration {
+                name,
+                params,
+                ret_ty,
+                block,
+            } => {
+                assert_eq!(name.lexeme(), "magdagdag");
+                assert!(params.item().is_empty());
+                assert_eq!(params.span(), &(13..15));
+                assert!(matches!(ret_ty, Some(TolType::Numero)));
+                assert_eq!(block.span(), &(23..25));
+            }
+            other => panic!("unexpected statement: {:?}", other),
+        }
+    }
+
 }
