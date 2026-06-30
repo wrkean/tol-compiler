@@ -22,6 +22,8 @@ impl<'src> Lexer<'src> {
     pub fn new(source: &'src str) -> Self {
         use TokenKind::*;
         let mut keywords = HashMap::new();
+        keywords.insert("ang", Ang);
+        keywords.insert("dapat", Dapat);
         keywords.insert("par", Par);
         keywords.insert("kung", Kung);
         keywords.insert("kungdi", Kungdi);

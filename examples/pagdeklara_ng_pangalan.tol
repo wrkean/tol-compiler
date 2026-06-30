@@ -1,17 +1,6 @@
--- Ang pagdeklara ng pangalan ay ginagamitan ng `:` pagkatapos ng pangalan.
--- Huwag ito iparehas sa sintax ng pag `assign` ng pangalan.
---
--- Ang pag assign ng pangalan ay may sintax na:
---      <pangalan> = <balyu>
--- kumpara sa sintax ng pagdeklara ng pangalan na:
---      <pangalan>: [data_type] = <balyu>
--- Ang `[]` ay nagdidikta na ito ay **optional** o **hindi kailangan**
-x: numero = 1              -- May data type na `numero`
-xx := 1                    -- Pwede ding mag `infer` ang tol kung ano ang data type ng isang pangalan, kaya valid din ito
--- dapat y := 2.2             -- May data type na `lutang`, ito ay di pwedeng i-assign ulit dahil sa `dapat` na keyword
+ang x: numero = 1              -- May data type na `numero`
+ang xx = 1                     -- Pwede ding mag `infer` ang tol kung ano ang data type ng isang pangalan, kaya valid din ito
 
 -- Sa tol, illegal ang pagpalit ng data type
 x = 4.2     -- Illegal, dahil ang x ay naideklara na may `numero` na data type
 xx = 1.2    -- Illegal din sa kaparehong dahilan
-
-y = 2.2     -- Illegal kahit na may kaparehong data type sa pagdeklara, dahil idineklara ito gamit ang `dapat` na keyword

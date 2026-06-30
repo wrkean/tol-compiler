@@ -40,9 +40,8 @@ impl<'m> Parser<'m> {
 
     fn parse_statement(&mut self) -> TolResult<Stmt> {
         match self.peek().kind() {
-            tk if tk == &TokenKind::Identifier && self.peek_next().kind() == &TokenKind::Colon => {
-                self.parse_name_declaration()
-            }
+            TokenKind::Ang => self.parse_name_declaration(true),
+            TokenKind::Dapat => self.parse_name_declaration(false),
             TokenKind::Par => self.parse_par(),
 
             // If nothing matched, parse it as an expression statement instead
@@ -55,21 +54,27 @@ impl<'m> Parser<'m> {
         }
     }
 
-    fn parse_name_declaration(&mut self) -> TolResult<Stmt> {
-        let name = self.advance().clone();
-        let start = name.span().start;
-        self.advance(); // Consume `:`
-        let ty = if self.peek().kind() == &TokenKind::Equal {
-            None
-        } else {
+    fn parse_name_declaration(&mut self, is_mutable: bool) -> TolResult<Stmt> {
+        let start = self.advance().span().start;
+        let name = self.consume(TokenKind::Identifier, "<pangalan>")?.clone();
+        let ty = if self.peek().kind() == &TokenKind::Colon {
+            self.advance();
             Some(self.parse_type()?)
+        } else {
+            None
         };
 
         self.consume(TokenKind::Equal, "=")?;
         let rhs = self.parse_expression(0)?;
         let end = self.consume(TokenKind::Semicolon, ";")?.span().end;
 
-        Ok(Stmt::new_name_declaration(start..end, name, ty, rhs))
+        Ok(Stmt::new_name_declaration(
+            start..end,
+            is_mutable,
+            name,
+            ty,
+            rhs,
+        ))
     }
 
     fn parse_par(&mut self) -> TolResult<Stmt> {

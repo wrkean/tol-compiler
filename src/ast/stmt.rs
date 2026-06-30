@@ -14,9 +14,20 @@ pub struct Stmt {
 }
 
 impl Stmt {
-    pub fn new_name_declaration(span: Span, name: Token, ty: Option<TolType>, rhs: Expr) -> Self {
+    pub fn new_name_declaration(
+        span: Span,
+        is_mutable: bool,
+        name: Token,
+        ty: Option<TolType>,
+        rhs: Expr,
+    ) -> Self {
         Self {
-            kind: StmtKind::NameDeclaration { name, ty, rhs },
+            kind: StmtKind::NameDeclaration {
+                is_mutable,
+                name,
+                ty,
+                rhs,
+            },
             span,
         }
     }
@@ -54,6 +65,7 @@ impl Stmt {
 #[derive(Debug)]
 pub enum StmtKind {
     NameDeclaration {
+        is_mutable: bool,
         name: Token,
         ty: Option<TolType>,
         rhs: Expr,

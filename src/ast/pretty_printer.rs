@@ -40,9 +40,15 @@ impl<'ast> ASTPrettyPrinter<'ast> {
 
     fn pretty_statement_buf(&mut self, buf: &mut impl Write, statement: &Stmt) {
         match statement.kind() {
-            StmtKind::NameDeclaration { name, ty, rhs } => {
+            StmtKind::NameDeclaration {
+                is_mutable,
+                name,
+                ty,
+                rhs,
+            } => {
                 self.writeln_buf(buf, format_args!("Name Declaration {{"));
                 self.indent();
+                self.writeln_buf(buf, format_args!("is mutable: {}", is_mutable));
                 self.writeln_buf(buf, format_args!("name: {}", name.lexeme()));
                 self.writeln_buf(buf, format_args!("type: {:?}", ty));
                 let rhs = self.pretty_expression(rhs);

@@ -27,6 +27,8 @@ impl Token {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TokenKind {
+    Ang,
+    Dapat,
     Par,
     Kung,
     Kungdi,
@@ -88,7 +90,7 @@ impl TokenKind {
     }
 
     pub fn is_synchronization_point(&self) -> bool {
-        matches!(self, Self::Identifier | Self::Par)
+        matches!(self, Self::Ang | Self::Dapat | Self::Par)
     }
 }
 
