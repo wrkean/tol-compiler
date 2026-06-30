@@ -1,11 +1,11 @@
 use std::{mem, sync::Arc};
 
-use crate::{diagnostic::TolDiagnostic, token::Token};
+use crate::{ast::stmt::Stmt, diagnostic::TolDiagnostic, token::Token};
 
 pub struct Module {
     source_code: Arc<str>,
     diagnostics: Option<Vec<TolDiagnostic>>,
-    // ast: Vec<Stmt>,
+    ast: Vec<Stmt>,
 }
 
 impl Module {
@@ -13,6 +13,7 @@ impl Module {
         Self {
             source_code: source_code.into(),
             diagnostics: None,
+            ast: Vec::new(),
         }
     }
 
@@ -42,6 +43,16 @@ impl Module {
                     Arc::clone(&self.source_code)
                 )
             )
+        }
+    }
+
+    pub fn add_statement(&mut self, statement: Stmt) {
+        self.ast.push(statement);
+    }
+
+    pub fn display_ast(&self) {
+        for statement in self.ast.iter() {
+            println!("{}", statement.pretty());
         }
     }
 

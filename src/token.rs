@@ -70,8 +70,9 @@ impl TokenKind {
 
     pub fn precedence(&self) -> u8 {
         match self {
-            TokenKind::Plus | TokenKind::Minus => 1,
-            TokenKind::Star | TokenKind::Slash => 2,
+            TokenKind::Equal => 1,
+            TokenKind::Plus | TokenKind::Minus => 2,
+            TokenKind::Star | TokenKind::Slash => 3,
             _ => 0,
         }
     }

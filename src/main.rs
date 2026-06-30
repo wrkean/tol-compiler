@@ -41,6 +41,8 @@ fn main() {
 
     let mut parser = Parser::new(tokens, &mut module);
     parser.run();
+    module.display_ast();
+
     module.report_diagnostics();
 }
 

@@ -26,19 +26,26 @@ impl<'m> Parser<'m> {
     }
 
     pub fn run(&mut self) {
-        if let Err(diag) = self.parse_expression(0) {
-            self.modul.add_diagnostic(diag);
-        };
+        while !self.is_at_end() {
+            match self.parse_statement() {
+                Ok(statement) => self.modul.add_statement(statement),
+                Err(diag) => self.modul.add_diagnostic(diag),
+            }
+        }
     }
 
-    fn parse_statement(&mut self) {
+    fn parse_statement(&mut self) -> TolResult<Stmt> {
         match self.peek().kind() {
-            TokenKind::Identifier => {
-                if self.peek_next().kind() == &TokenKind::Colon {
-                    self.parse_name_declaration();
-                }
+            tk if tk == &TokenKind::Identifier && self.peek_next().kind() == &TokenKind::Colon => {
+                self.parse_name_declaration()
             }
-            _ => todo!(),
+            // If nothing matched, parse it as an expression statement instead
+            _ => {
+                let expr = self.parse_expression(0)?;
+                let end = self.consume(TokenKind::Semicolon, ";")?.span().end;
+                let span = expr.span().start..end;
+                Ok(Stmt::new_expression(span, expr))
+            }
         }
     }
 
@@ -54,7 +61,7 @@ impl<'m> Parser<'m> {
 
         self.consume(TokenKind::Equal, "=")?;
         let rhs = self.parse_expression(0)?;
-        let end = rhs.span().end;
+        let end = self.consume(TokenKind::Semicolon, ";")?.span().end;
 
         Ok(Stmt::new_name_declaration(start..end, name, ty, rhs))
     }
@@ -122,7 +129,11 @@ impl<'m> Parser<'m> {
         };
 
         match op.kind() {
-            TokenKind::Plus | TokenKind::Minus | TokenKind::Star | TokenKind::Slash => {
+            TokenKind::Plus
+            | TokenKind::Minus
+            | TokenKind::Star
+            | TokenKind::Slash
+            | TokenKind::Equal => {
                 let right = self.parse_expression(precedence)?;
                 let span = left.span().start..right.span().end;
 

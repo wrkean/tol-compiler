@@ -8,7 +8,7 @@
 -- Ang `[]` ay nagdidikta na ito ay **optional** o **hindi kailangan**
 x: numero = 1              -- May data type na `numero`
 xx := 1                    -- Pwede ding mag `infer` ang tol kung ano ang data type ng isang pangalan, kaya valid din ito
-dapat y := 2.2             -- May data type na `lutang`, ito ay di pwedeng i-assign ulit dahil sa `dapat` na keyword
+-- dapat y := 2.2             -- May data type na `lutang`, ito ay di pwedeng i-assign ulit dahil sa `dapat` na keyword
 
 -- Sa tol, illegal ang pagpalit ng data type
 x = 4.2     -- Illegal, dahil ang x ay naideklara na may `numero` na data type
