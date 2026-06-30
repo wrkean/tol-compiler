@@ -27,4 +27,12 @@ pub enum TolError {
         #[label("Hindi ito pwedeng magsimula ng isang expresyon")]
         span: SourceSpan,
     },
+
+    #[error("May nakita akong hindi ko kilalang tipo: `{invalid_type}`")]
+    InvalidType {
+        invalid_type: String,
+
+        #[label("Ito ay hindi isang valid na tipo sa tol")]
+        type_span: SourceSpan,
+    },
 }

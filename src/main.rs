@@ -11,6 +11,7 @@ mod module;
 mod parser;
 mod prelude;
 mod token;
+mod toltype;
 
 fn main() {
     let source_code = {

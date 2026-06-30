@@ -1,9 +1,13 @@
 use crate::{
-    ast::expr::{Expr, ExprKind},
+    ast::{
+        expr::{Expr, ExprKind},
+        stmt::Stmt,
+    },
     diagnostic::{TolDiagnostic, error::TolError},
     module::Module,
     prelude::TolResult,
     token::{Associativity, Token, TokenKind},
+    toltype::TolType,
 };
 
 pub struct Parser<'m> {
@@ -25,6 +29,48 @@ impl<'m> Parser<'m> {
         if let Err(diag) = self.parse_expression(0) {
             self.modul.add_diagnostic(diag);
         };
+    }
+
+    fn parse_statement(&mut self) {
+        match self.peek().kind() {
+            TokenKind::Identifier => {
+                if self.peek_next().kind() == &TokenKind::Colon {
+                    self.parse_name_declaration();
+                }
+            }
+            _ => todo!(),
+        }
+    }
+
+    fn parse_name_declaration(&mut self) -> TolResult<Stmt> {
+        let name = self.advance().clone();
+        let start = name.span().start;
+        self.advance(); // Consume `:`
+        let ty = if self.peek().kind() == &TokenKind::Equal {
+            None
+        } else {
+            Some(self.parse_type()?)
+        };
+
+        self.consume(TokenKind::Equal, "=")?;
+        let rhs = self.parse_expression(0)?;
+        let end = rhs.span().end;
+
+        Ok(Stmt::new_name_declaration(start..end, name, ty, rhs))
+    }
+
+    fn parse_type(&mut self) -> TolResult<TolType> {
+        let ty = if self.peek().kind() != &TokenKind::Identifier {
+            return Err(TolDiagnostic::new_error(TolError::UnexpectedToken {
+                token: self.peek().lexeme().to_string(),
+                expected: "tipo".to_string(),
+                span: self.peek().span().clone().into(),
+            }));
+        } else {
+            self.advance()
+        };
+
+        TolType::from_str(ty.lexeme(), ty.span().clone())
     }
 
     fn parse_expression(&mut self, precedence: u8) -> TolResult<Expr> {
