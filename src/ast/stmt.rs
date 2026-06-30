@@ -1,7 +1,13 @@
 use std::fmt;
 
-use crate::{ast::expr::Expr, prelude::Span, token::Token, toltype::TolType};
+use crate::{
+    ast::{Param, expr::Expr},
+    prelude::{Span, Spanned},
+    token::Token,
+    toltype::TolType,
+};
 
+#[derive(Debug)]
 pub struct Stmt {
     kind: StmtKind,
     span: Span,
@@ -22,16 +28,41 @@ impl Stmt {
         }
     }
 
+    pub fn new_par(
+        span: Span,
+        name: Token,
+        params: Spanned<Vec<Param>>,
+        ret_ty: Option<TolType>,
+        block: Expr,
+    ) -> Self {
+        Self {
+            kind: StmtKind::FunctionDeclaration {
+                name,
+                params,
+                ret_ty,
+                block,
+            },
+            span,
+        }
+    }
+
     pub fn kind(&self) -> &StmtKind {
         &self.kind
     }
 }
 
+#[derive(Debug)]
 pub enum StmtKind {
     NameDeclaration {
         name: Token,
         ty: Option<TolType>,
         rhs: Expr,
+    },
+    FunctionDeclaration {
+        name: Token,
+        params: Spanned<Vec<Param>>,
+        ret_ty: Option<TolType>,
+        block: Expr,
     },
     Expression {
         expr: Expr,

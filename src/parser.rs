@@ -1,11 +1,12 @@
 use crate::{
     ast::{
+        Param,
         expr::{Expr, ExprKind},
         stmt::Stmt,
     },
     diagnostic::{TolDiagnostic, error::TolError},
     module::Module,
-    prelude::TolResult,
+    prelude::{Spanned, TolResult},
     token::{Associativity, Token, TokenKind},
     toltype::TolType,
 };
@@ -29,7 +30,10 @@ impl<'m> Parser<'m> {
         while !self.is_at_end() {
             match self.parse_statement() {
                 Ok(statement) => self.modul.add_statement(statement),
-                Err(diag) => self.modul.add_diagnostic(diag),
+                Err(diag) => {
+                    self.modul.add_diagnostic(diag);
+                    self.synchonize();
+                }
             }
         }
     }
@@ -39,6 +43,8 @@ impl<'m> Parser<'m> {
             tk if tk == &TokenKind::Identifier && self.peek_next().kind() == &TokenKind::Colon => {
                 self.parse_name_declaration()
             }
+            TokenKind::Par => self.parse_par(),
+
             // If nothing matched, parse it as an expression statement instead
             _ => {
                 let expr = self.parse_expression(0)?;
@@ -64,6 +70,58 @@ impl<'m> Parser<'m> {
         let end = self.consume(TokenKind::Semicolon, ";")?.span().end;
 
         Ok(Stmt::new_name_declaration(start..end, name, ty, rhs))
+    }
+
+    fn parse_par(&mut self) -> TolResult<Stmt> {
+        let start = self.advance().span().start;
+        let name = self.consume(TokenKind::Identifier, "<pangalan>")?.clone();
+        let params = self.parse_params()?;
+        let ret_ty = if self.peek().kind() == &TokenKind::LBrace {
+            None
+        } else {
+            Some(self.parse_type()?)
+        };
+
+        let block = self.parse_block()?;
+        let end = block.span().end;
+
+        Ok(Stmt::new_par(start..end, name, params, ret_ty, block))
+    }
+
+    fn parse_block(&mut self) -> TolResult<Expr> {
+        let start = self.consume(TokenKind::LBrace, "{")?.span().start;
+        let mut statements = Vec::new();
+        while !self.is_at_end() && self.peek().kind() != &TokenKind::RBrace {
+            match self.parse_statement() {
+                Ok(statement) => statements.push(statement),
+                Err(diag) => self.modul.add_diagnostic(diag),
+            }
+        }
+        let end = self.consume(TokenKind::RBrace, "}")?.span().end;
+
+        Ok(Expr::new_block(start..end, statements))
+    }
+
+    fn parse_params(&mut self) -> TolResult<Spanned<Vec<Param>>> {
+        let start = self.consume(TokenKind::LParen, "(")?.span().start;
+        let mut params = Vec::new();
+        while !self.is_at_end() && self.peek().kind() != &TokenKind::RParen {
+            let name = self.consume(TokenKind::Identifier, "<pangalan>")?.clone();
+            self.consume(TokenKind::Colon, ":")?;
+            let ty = self.parse_type()?;
+
+            let span = name.span().start..self.peek_prev().span().end;
+
+            if self.peek().kind() == &TokenKind::Comma {
+                self.advance();
+            }
+
+            params.push(Param::new(name, ty, span));
+        }
+
+        let end = self.consume(TokenKind::RParen, ")")?.span().end;
+
+        Ok(Spanned::new(params, start..end))
     }
 
     fn parse_type(&mut self) -> TolResult<TolType> {
@@ -150,8 +208,35 @@ impl<'m> Parser<'m> {
         }
     }
 
+    fn synchonize(&mut self) {
+        if self.is_at_end() {
+            return;
+        }
+
+        self.advance();
+
+        while !self.is_at_end() {
+            let previous = &self.tokens[self.current - 1];
+
+            // Tokens provided here are statement delimiters
+            if matches!(previous.kind(), TokenKind::Semicolon | TokenKind::RBrace) {
+                return;
+            }
+
+            if self.peek().kind().is_synchronization_point() {
+                return;
+            }
+
+            self.advance();
+        }
+    }
+
     fn peek(&self) -> &Token {
         &self.tokens[self.current]
+    }
+
+    fn peek_prev(&self) -> &Token {
+        &self.tokens[self.current - 1]
     }
 
     fn peek_next(&self) -> &Token {

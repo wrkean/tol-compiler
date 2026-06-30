@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{prelude::Span, token::Token};
+use crate::{ast::stmt::Stmt, prelude::Span, token::Token};
 
 #[derive(Debug)]
 pub struct Expr {
@@ -11,6 +11,13 @@ pub struct Expr {
 impl Expr {
     pub fn new(kind: ExprKind, span: Span) -> Self {
         Self { kind, span }
+    }
+
+    pub fn new_block(span: Span, statements: Vec<Stmt>) -> Self {
+        Self {
+            kind: ExprKind::Block { statements },
+            span,
+        }
     }
 
     pub fn span(&self) -> &Span {
@@ -32,6 +39,9 @@ pub enum ExprKind {
         rhs: Box<Expr>,
         op: Token,
     },
+    Block {
+        statements: Vec<Stmt>,
+    },
 }
 
 // ============= USED FOR TESTS ONLY =============
@@ -50,6 +60,7 @@ impl fmt::Display for ExprKind {
             ExprKind::Binary { lhs, rhs, op } => {
                 write!(f, "({} {} {})", lhs, op.lexeme(), rhs)
             }
+            _ => unimplemented!(),
         }
     }
 }

@@ -1,7 +1,9 @@
-par fibonacci(n: numero) numero {
-    kung n < 1 {
-        ibalik n
-    }
+par fibonacci(n: numero, x: par) numero {
+--    kung n < 1 {
+--        ibalik n
+--    }
 
-    ibalik fibonacci(n - 1) + fibonacci(n - 2)
+--    ibalik fibonacci(n - 1) + fibonacci(n - 2)
+    x: numero = 2
+    y := 1
 }

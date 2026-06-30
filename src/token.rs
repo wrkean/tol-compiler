@@ -39,6 +39,7 @@ pub enum TokenKind {
     RSquare, // ]
     LBrace,
     RBrace,
+    Comma,
     Colon,
     Semicolon,
     Lesser,
@@ -84,6 +85,10 @@ impl TokenKind {
             }
             _ => Associativity::Right,
         }
+    }
+
+    pub fn is_synchronization_point(&self) -> bool {
+        matches!(self, Self::Identifier | Self::Par)
     }
 }
 
