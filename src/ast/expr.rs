@@ -44,6 +44,13 @@ pub enum ExprKind {
     },
 }
 
+impl ExprKind {
+    pub fn is_lvalue(&self) -> bool {
+        use ExprKind::*;
+        matches!(self, Identifier(_))
+    }
+}
+
 // ============= USED FOR TESTS ONLY =============
 impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -41,6 +41,21 @@ impl Symbol {
         }
     }
 
+    /// Returns one of the following based on the symbol kind:
+    /// - name declaration type
+    /// - function return type
+    /// - none
+    pub fn ty(&self) -> Option<TolType> {
+        match &self.kind {
+            SymbolKind::Name { declared_type, .. } => declared_type.clone(),
+            SymbolKind::Function {
+                param_types,
+                param_span,
+                declared_return_type,
+            } => Some(declared_return_type.clone()),
+        }
+    }
+
     pub fn declared_span(&self) -> &Span {
         &self.declared_span
     }

@@ -3,7 +3,7 @@ use crate::{
     prelude::{Span, TolResult},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TolType {
     Numero,
     Lutang,
@@ -28,5 +28,14 @@ impl TolType {
         };
 
         Ok(ty)
+    }
+
+    pub fn to_tol_str(&self) -> String {
+        match self {
+            TolType::Numero => "numero".to_string(),
+            TolType::Lutang => "lutang".to_string(),
+            TolType::Wala => "<invalid:wala>".to_string(),
+            TolType::DiAlam => "<invalid:dialam>".to_string(),
+        }
     }
 }
