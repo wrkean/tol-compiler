@@ -135,6 +135,8 @@ impl<'sema> NameResolver<'sema> {
             unreachable!()
         };
 
+        self.resolve_expression(rhs)?;
+
         let symbol = Symbol::new_name(
             name.lexeme().to_string(),
             name.span().clone(),
@@ -143,7 +145,6 @@ impl<'sema> NameResolver<'sema> {
         );
 
         let id = self.declare_symbol(symbol)?;
-        self.resolve_expression(rhs)?;
         name_declaration.set_symbol_id(id);
 
         Ok(())
