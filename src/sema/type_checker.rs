@@ -66,13 +66,12 @@ impl<'sema> TypeChecker<'sema> {
 
         match ty {
             Some(t) => {
-                self.coerce(&rhs_ty, t).ok_or(TolDiagnostic::new_error(
-                    TolError::InvalidAssignment {
+                self.common_type(&rhs_ty, t)
+                    .ok_or(TolDiagnostic::new_error(TolError::InvalidAssignment {
                         lhs_ty_str: t.to_tol_str(),
                         rhs_ty_str: rhs_ty.to_tol_str(),
                         rhs_span: rhs.span().clone().into(),
-                    },
-                ))?;
+                    }))?;
             }
             None => {
                 let id = statement.symbol_id().unwrap();
@@ -179,7 +178,7 @@ impl<'sema> TypeChecker<'sema> {
             return Ok(());
         }
 
-        if self.coerce(rhs_type, lhs_type).is_some() {
+        if self.common_type(rhs_type, lhs_type).is_some() {
             // Optionally insert an ImplicitCast node here.
             return Ok(());
         }
@@ -205,7 +204,7 @@ impl<'sema> TypeChecker<'sema> {
             return Ok(lhs_type.clone());
         }
 
-        self.coerce(lhs_type, rhs_type)
+        self.common_type(lhs_type, rhs_type)
             .ok_or(TolDiagnostic::new_error(TolError::InvalidOperandTypes {
                 lhs_ty_str: lhs_type.to_tol_str(),
                 rhs_ty_str: rhs_type.to_tol_str(),
@@ -215,12 +214,13 @@ impl<'sema> TypeChecker<'sema> {
             }))
     }
 
-    fn coerce(&self, from: &TolType, to: &TolType) -> Option<TolType> {
-        if from == to {
-            return Some(from.clone());
+    /// Can these two types be converted into one common type?
+    fn common_type(&self, lhs: &TolType, rhs: &TolType) -> Option<TolType> {
+        if lhs == rhs {
+            return Some(lhs.clone());
         }
 
-        match (from, to) {
+        match (lhs, rhs) {
             (TolType::Numero, TolType::Lutang) | (TolType::Lutang, TolType::Numero) => {
                 Some(TolType::Lutang)
             }
