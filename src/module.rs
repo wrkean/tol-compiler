@@ -3,6 +3,7 @@ use std::{mem, sync::Arc};
 use crate::{
     ast::{pretty_printer::ASTPrettyPrinter, stmt::Stmt},
     diagnostic::TolDiagnostic,
+    symbol::Symbol,
     token::Token,
 };
 
@@ -10,6 +11,7 @@ pub struct Module {
     source_code: Arc<str>,
     diagnostics: Option<Vec<TolDiagnostic>>,
     ast: Vec<Stmt>,
+    symbol_table: Vec<Symbol>,
 }
 
 impl Module {
@@ -18,6 +20,7 @@ impl Module {
             source_code: source_code.into(),
             diagnostics: None,
             ast: Vec::new(),
+            symbol_table: Vec::new(),
         }
     }
 
@@ -65,5 +68,15 @@ impl Module {
 
     pub fn source_code_arc(&self) -> Arc<str> {
         Arc::clone(&self.source_code)
+    }
+
+    pub fn add_symbol(&mut self, symbol: Symbol) -> usize {
+        self.symbol_table.push(symbol);
+
+        self.symbol_table.len() - 1
+    }
+
+    pub fn get_symbol(&mut self, id: usize) -> Option<&Symbol> {
+        self.symbol_table.get(id)
     }
 }

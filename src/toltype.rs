@@ -3,12 +3,15 @@ use crate::{
     prelude::{Span, TolResult},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TolType {
     Numero,
     Lutang,
 
     Wala,
+
+    // When a data type is not yet determined, it is unknown (di alam)
+    DiAlam,
 }
 
 impl TolType {

@@ -10,6 +10,8 @@ mod lexer;
 mod module;
 mod parser;
 mod prelude;
+mod sema;
+mod symbol;
 mod token;
 mod toltype;
 

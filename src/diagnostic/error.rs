@@ -35,4 +35,24 @@ pub enum TolError {
         #[label("Ito ay hindi isang valid na tipo sa tol")]
         type_span: SourceSpan,
     },
+
+    #[error("May nakita akong pangalan na idineklara mo ulit sa kaparehong sakop: `{name}`")]
+    #[diagnostic(help("Maaaring isa lamang na kaparehong pangalan ang nasa isang sakop"))]
+    NameRedeclaration {
+        name: String,
+
+        #[label("Naideklara mo na ang `{name}` dito...")]
+        declared_span: SourceSpan,
+
+        #[label("...at nakita kong naideklara mo ulit dito")]
+        redeclared_span: SourceSpan,
+    },
+
+    #[error("May nakita akong pangalan na ginamit ngunit hindi pa ito naideklara: `{name}`")]
+    UseOfUndeclaredName {
+        name: String,
+
+        #[label("Hindi mo pa ito naideklara")]
+        span: SourceSpan,
+    },
 }
