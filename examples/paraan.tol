@@ -2,4 +2,9 @@ par paraan(n: numero, x: numero) numero {
     ang x: numero = 2
     ang x: numero = 2
     ang y = 1
+    ang z = v
+
+    ang x = 1
 }
+
+par paraan() {}

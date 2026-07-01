@@ -36,4 +36,8 @@ impl AnalyzerCtx {
     pub fn lookup_current_scope(&self, name: &str) -> Option<usize> {
         self.symbol_scope.last().unwrap().get(name).cloned()
     }
+
+    pub fn add_symbol_id(&mut self, name: String, id: usize) {
+        self.symbol_scope.last_mut().unwrap().insert(name, id);
+    }
 }

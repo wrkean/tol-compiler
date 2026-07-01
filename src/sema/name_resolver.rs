@@ -147,11 +147,12 @@ impl<'sema> NameResolver<'sema> {
             ty.clone(),
         );
 
-        self.declare_symbol(symbol)
+        self.declare_symbol(symbol)?;
+        self.resolve_expression(rhs)
     }
 
     fn declare_symbol(&mut self, symbol: Symbol) -> TolResult<()> {
-        match self.analyzer_ctx.lookup_symbol(symbol.name()) {
+        match self.analyzer_ctx.lookup_current_scope(symbol.name()) {
             Some(id) => {
                 let declared_symbol = self.modul.get_symbol(id).unwrap();
                 let declared_span = declared_symbol.declared_span().clone().into();
@@ -163,7 +164,9 @@ impl<'sema> NameResolver<'sema> {
                 }))
             }
             None => {
-                self.modul.add_symbol(symbol);
+                let name = symbol.name().to_string();
+                let id = self.modul.add_symbol(symbol);
+                self.analyzer_ctx.add_symbol_id(name, id);
 
                 Ok(())
             }

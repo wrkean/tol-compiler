@@ -2,7 +2,7 @@ use std::{mem, sync::Arc};
 
 use crate::{
     ast::{pretty_printer::ASTPrettyPrinter, stmt::Stmt},
-    diagnostic::TolDiagnostic,
+    diagnostic::{DiagnosticType, TolDiagnostic},
     symbol::Symbol,
     token::Token,
 };
@@ -43,6 +43,7 @@ impl Module {
         );
 
         for diag in diagnostics.into_iter() {
+            diag.display_banner();
             eprintln!(
                 "{:?}",
                 miette::Report::with_source_code(

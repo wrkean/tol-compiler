@@ -28,4 +28,14 @@ impl TolDiagnostic {
             Self::Error(_) => DiagnosticType::Error,
         }
     }
+
+    pub fn display_banner(&self) {
+        match self.ty() {
+            DiagnosticType::Error => eprintln!("{} ERROR {}", "!".repeat(30), "!".repeat(30)),
+            DiagnosticType::Warning => {
+                eprintln!("{} WARNING {}", "~".repeat(30), "~".repeat(30))
+            }
+            DiagnosticType::Advice => eprintln!("{} ADVICE {}", "=".repeat(30), "=".repeat(30)),
+        }
+    }
 }
